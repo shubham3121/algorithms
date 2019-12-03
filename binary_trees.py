@@ -5,6 +5,12 @@ class Node:
         self.right = None
         self.val = val
 
+    def __str__(self):
+        return self.val
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class BinarySearchTree:
     def __init__(self):
@@ -101,30 +107,28 @@ class BinarySearchTree:
                 root = root.right
         return root
 
-    def maximum(self, node=None):
+    def maximum(self, node):
         """
         Given a node, find the maximum value in the subtree of that node.
-        If node is not provided, then returns the maximum value in the binary tree.
         Time complexity: O(h), h is the height of the tree.
         """
-        if node:
-            root = node
-        else:
-            root = self.root
+        if not node:
+            return node
+
+        root = node
         while root.right:
             root = root.right
         return root
 
-    def minimum(self, node=None):
+    def minimum(self, node):
         """
         Given a node, finds the minimum value in the subtree of the node.
-        If the node is not provided, then returns the minimum value of the binary tree.
         Time complexity:  O(h), h is the height of the tree.
         """
-        if node:
-            root = node
-        else:
-            root = self.root
+        if not node:
+            return node
+
+        root = node
         while root.left:
             root = root.left
         return root
@@ -166,3 +170,38 @@ class BinarySearchTree:
             node = parent
             parent = parent.parent
         return parent
+
+    def _transplant(self, node, subnode):
+
+        if not node.parent:
+            self.root = subnode
+
+        parent = node.parent
+        if parent.left == node:
+            parent.left = subnode
+        else:
+            parent.right = subnode
+        if subnode and not subnode.parent:
+            subnode.parent = parent
+
+    def delete(self, node):
+        """
+        Given a node, deletes a node from the subtree.
+        Time complexity: O(h), h is the height of the tree.
+        """
+        if not node.left and not node.right:
+            self._transplant(node=node, subnode=None)
+        elif not node.left:
+            self._transplant(node=node, subnode=node.right)
+        elif not node.right:
+            self._transplant(node=node, subnode=node.left)
+        else:
+            subnode = self.minimum(node=node.right)
+            if not subnode.parent == node:
+                self._transplant(node=subnode, subnode=subnode.right)
+                subnode.right = node.right
+                subnode.right.parent = subnode
+
+            self._transplant(node=node, subnode=subnode)
+            subnode.left = node.left
+            subnode.left.parent = subnode
