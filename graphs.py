@@ -67,7 +67,7 @@ class DirectedGraph:
     def __str__(self):
         output = ""
         for node in self.nodes:
-            for edge in self.edges[node]:
+            for edge in self.EdgesOf(node):
                 output += "{} -> {} \n".format(node, edge)
         return output[:-1]
 
