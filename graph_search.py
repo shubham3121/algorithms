@@ -5,113 +5,89 @@ from graphs import DirectedGraph, Edge, Node
 
 class GraphSearch(DirectedGraph):
     def bfs(self, src, dest):
-        path = OrderedDict()
-        path[src] = None
-        queue = [src]
+        level = {src: None}
+        parent = {src: None}
+        counter = 1
 
+        queue = [src]
         while queue:
             node = queue.pop(0)
-            for edge in self.EdgesOf(node):
-                if edge not in path:
-                    path[edge] = node
-                    if edge == dest:
-                        return path
-                    queue.append(edge)
-        return path
+            for child in self.EdgesOf(node):
+                if child not in level:
+                    parent[child] = node
+                    level[child] = counter
+                    if child == dest:
+                        break
+                    queue.append(child)
+            counter += 1
+
+        return parent, level
 
     def bfsShortest(self, src, dest):
-        path = OrderedDict()
-        path[src] = None
-        queue = [src]
-        shortest = None
+        path = []
+        parent, level = self.bfs(src=src, dest=dest)
 
-        while queue:
-            node = queue.pop(0)
-            for edge in self.EdgesOf(node):
-                if edge not in path:
-                    path[edge] = node
-                    if edge == dest:
-                        shortest = path
-                    queue.append(edge)
+        dest_level = level[dest]
+        while dest_level > 0:
+            path.append(str(dest))
+            dest = parent[dest]
+            dest_level -= 1
+
+        return path[::-1]
+
+    def printpath(self, path):
+        return "->".join([str(n) for n in path])
+
+    def dfs(self, src, dest, path, shortest):
+        path[src] = None
+        if src == dest:
+            return path
+        for child in self.EdgesOf(src):
+            if child not in path:
+                if shortest == None or len(path) < len(shortest):
+                    new_path = self.dfs(child, dest, path.copy(), shortest)
+                    if new_path != None:
+                        shortest = new_path
         return shortest
 
-    def printpath(self, path, verbose=1):
-        if path is None:
-            print("No path found")
-
-        if verbose > 1:
-            for dest, src in path.items():
-                print("{} -> {}".format(src, dest))
-        else:
-            for node in path.keys():
-                print("{}->".format(node), end="", sep="")
-
-    def dfs_visit(self, src, parent):
-        for node in self.EdgesOf(src):
-            if node not in parent:
-                parent[node] = src
-                parent = self.dfs_visit(node, parent)
-        return parent
-
-    def dfs_search(self, src):
-        parent = {}
-        for node in self.nodes:
-            if node not in parent:
-                parent[node] = None
-                self.dfs_visit(src=node, parent=parent)
-        return parent
+    def dfsShortest(self, src, dest):
+        return self.dfs(src, dest, OrderedDict(), None)
 
 
-def build_graph():
-    vertices = []
-    for i in range(0, 4):
-        vertex = Node(i)
-        vertices.append(vertex)
-    edges = [
-        Edge(vertices[0], vertices[1]),
-        Edge(vertices[0], vertices[2]),
-        Edge(vertices[1], vertices[2]),
-        Edge(vertices[2], vertices[0]),
-        Edge(vertices[2], vertices[3]),
-        Edge(vertices[3], vertices[3]),
-    ]
-    digraph = GraphSearch()
-    for vertex in vertices:
-        digraph.addNode(vertex)
-    for edge in edges:
-        digraph.addEdge(edge)
+def build_and_test():
+    nodes = []
+    for name in range(6):
+        nodes.append(Node(str(name)))  # Create 6 nodes
+        g = GraphSearch()
+    for n in nodes:
+        g.addNode(n)
+    g.addEdge(Edge(nodes[0], nodes[1]))
+    g.addEdge(Edge(nodes[1], nodes[2]))
+    g.addEdge(Edge(nodes[2], nodes[3]))
+    g.addEdge(Edge(nodes[2], nodes[4]))
+    g.addEdge(Edge(nodes[3], nodes[4]))
+    g.addEdge(Edge(nodes[3], nodes[5]))
+    g.addEdge(Edge(nodes[0], nodes[2]))
+    g.addEdge(Edge(nodes[1], nodes[0]))
+    g.addEdge(Edge(nodes[3], nodes[1]))
+    g.addEdge(Edge(nodes[4], nodes[0]))
 
-    return digraph
+    # Print Directed Graph
+    print("Graph:\n{}".format(g))
+
+    # Shortest path using BFS.
+    bfspath = g.bfsShortest(nodes[0], nodes[5])
+    print("BFS Shortest path: {}".format(g.printpath(path=bfspath)))
+    print("BFS Shortest path test passed:", bfspath == ["0", "2", "3", "5"])
+
+    # Shortest path using DFS.
+    dfspath = g.dfsShortest(nodes[0], nodes[5])
+    print("DFS Shortest path: {}".format(g.printpath(path=dfspath)))
+    print(
+        "DFS Shortest path test passed:",
+        [str(n) for n in dfspath] == ["0", "2", "3", "5"],
+    )
 
 
-def test():
-    vertices = []
-    for i in range(0, 4):
-        vertex = Node(i)
-        vertices.append(vertex)
-    edges = [
-        Edge(vertices[0], vertices[1]),
-        Edge(vertices[0], vertices[2]),
-        Edge(vertices[1], vertices[2]),
-        Edge(vertices[2], vertices[0]),
-        Edge(vertices[2], vertices[3]),
-        Edge(vertices[3], vertices[3]),
-    ]
-
-    digraph = GraphSearch()
-    for vertex in vertices:
-        digraph.addNode(vertex)
-    for edge in edges:
-        digraph.addEdge(edge)
-    print("Directed Graph:\n", digraph, sep="")
-
-    src = list(digraph.nodes)[3]
-    parent, _ = digraph.bfs_search(src)
-    print("BFS Search:")
-    for key in parent.keys():
-        print(key)
-
-    parent = digraph.dfs_search(src)
-    print("DFS Search:")
-    for key in parent.keys():
-        print("{key}: {parent}".format(key=key, parent=parent[key]))
+if __name__ == "__main__":
+    build_and_test()
