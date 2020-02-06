@@ -58,7 +58,7 @@ def build_and_test():
     nodes = []
     for name in range(6):
         nodes.append(Node(str(name)))  # Create 6 nodes
-        g = GraphSearch()
+    g = GraphSearch()
     for n in nodes:
         g.addNode(n)
     g.addEdge(Edge(nodes[0], nodes[1]))
