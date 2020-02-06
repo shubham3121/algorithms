@@ -1,7 +1,7 @@
 from graph_search import DirectedGraph, Edge, Node
 
 
-class Cyclic(DirectedGraph):
+class ACyclicGraph(DirectedGraph):
     def _iscyclic(self, src, parent, stack):
         if src in stack:
             return True
@@ -29,7 +29,7 @@ def test():
     for name in range(4):
         nodes.append(Node(str(name)))  # Create 4 nodes
 
-    graph = Cyclic()
+    graph = ACyclicGraph()
 
     for node in nodes:
         graph.addNode(node)
@@ -45,7 +45,7 @@ def test():
     status = graph.iscyclic()
     print("Is graph cyclic: {}".format(status))
 
-    graph = Cyclic()
+    graph = ACyclicGraph()
 
     for node in nodes:
         graph.addNode(node)
