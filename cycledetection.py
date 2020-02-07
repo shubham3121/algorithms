@@ -61,5 +61,19 @@ def test():
     print("Is graph cyclic: {}".format(status))
 
 
+    graph = ACyclicGraph()
+
+    for node in nodes[:-1]:
+        graph.addNode(node)
+
+    graph.addEdge(Edge(nodes[0], nodes[1]))
+    graph.addEdge(Edge(nodes[1], nodes[2]))
+    graph.addEdge(Edge(nodes[2], nodes[0]))
+
+    print("Graph:\n{}".format(graph))
+    status = graph.iscyclic()
+    print("Is graph cyclic: {}".format(status))
+
+
 if __name__ == "__main__":
     test()
