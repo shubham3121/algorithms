@@ -3,24 +3,25 @@ from graph_search import DirectedGraph, Edge, Node
 
 class ACyclicGraph(DirectedGraph):
     def _iscyclic(self, src, parent, stack):
-        if src in stack:
-            return True
         stack.add(src)
         for child in self.EdgesOf(src):
+            if child in stack:
+                return True
             if child not in parent:
                 parent[child] = src
-                status = self._iscyclic(child, parent, stack)
-                if status:
+                if self._iscyclic(child, parent, stack):
                     return True
+        stack.remove(src)
         return False
 
     def iscyclic(self):
         parent = dict()
+        stack = set()
         for node in self.nodes:
-            stack = set()
-            status = self._iscyclic(node, parent, stack)
-            if status:
-                return True
+            if node not in parent:
+                parent[node] = None
+                if self._iscyclic(node, parent, stack):
+                    return True
         return False
 
 
